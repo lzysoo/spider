@@ -4,10 +4,10 @@ package qqnews;
  * 腾讯新闻 国际频道 新闻标题、链接、正文爬取
  */
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -32,7 +32,7 @@ public class Spider {
                 newsUrl = "http:" + newsUrl;
             if (!newsUrl.contains("http://"))
                 continue;
-            System.out.println(s + "\t" + newsUrl);
+//            System.out.println(s + "\t" + newsUrl);
             news.setNewsTitle(s);
             news.setNewsUrl(newsUrl);
 
@@ -53,13 +53,15 @@ public class Spider {
     public static HashMap<String,String> getNewsUrl(String url) throws IOException {
         HashMap<String,String> newsMap = new HashMap<String, String>();
         //模拟浏览器访问
-//        HttpClient client = HttpClientBuilder.create().setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36");
-//        HttpGet get = new HttpGet(url);
-//        HttpResponse response = client.execute(get);
-//        String html = EntityUtils.toString(response.getEntity());
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        //String url = "https://news.163.com/";
+        HttpGet httpGet = new HttpGet(url);
+        httpGet.setHeader("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36");
+        CloseableHttpResponse httpResponse = httpClient.execute(httpGet);
+        String html = EntityUtils.toString(httpResponse.getEntity());
 
-        Document document = Jsoup.connect(url).get();
-//        Document document = Jsoup.parse(html);
+        //Document document = Jsoup.connect(url).get();
+        Document document = Jsoup.parse(html);
         Elements titleDom = document.select(".linkto");
         for (Element ele : titleDom) {
             String newsTitle = ele.text();
